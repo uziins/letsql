@@ -1,0 +1,24 @@
+{
+  "name": "letsql",
+  "version": "1.0.0",
+  "description": "A lightweight and user-friendly Node.js ORM module for MySQL databases. Inspired by Eloquent in Laravel.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node example/test.js"
+  },
+  "keywords": [
+    "mysql",
+    "orm",
+    "node",
+    "node.js",
+    "sql",
+    "database",
+    "eloquent"
+  ],
+  "author": "uziins",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "mysql": "^2.18.1"
+  }
+}
