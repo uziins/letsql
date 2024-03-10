@@ -16,7 +16,7 @@
     "eloquent"
   ],
   "author": "uziins",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "dotenv": "^16.4.5",
     "mysql": "^2.18.1"

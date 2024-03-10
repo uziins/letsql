@@ -6,6 +6,8 @@ class Users extends Model {
 
         this.table = 'users';
         this.fillable = []
+        this.guarded = ['id']
+        this.timestamp = false
         this.hidden = ['password']
         this.casts = {
             is_active: 'boolean'

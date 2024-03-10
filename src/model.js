@@ -98,6 +98,7 @@ class Model {
      * @constructor
      * @description
      * Init table. Must be overridden by child class.
+     * Init primaryKey. Primary key of the table. Can be overridden by child class.
      * Init fillable. Fields that can be filled. Can be overridden by child class.
      * Init guarded. Fields that cannot be filled. Can be overridden by child class.
      * Init hidden. Fields that will be hidden from result. Can be overridden by child class.
@@ -108,6 +109,7 @@ class Model {
      */
     constructor() {
         this.table = ''; // init table, must be overridden by child class
+        this.primaryKey = 'id'; // can be overridden by child class
         this.fillable = []; // can be overridden by child class
         this.guarded = []; // can be overridden by child class
         this.hidden = []; // can be overridden by child class
@@ -404,6 +406,8 @@ class Model {
         return this;
     }
 
+    // TODO: add withCount
+
     /**
      * Execute raw query
      * @param query - string of query
@@ -443,14 +447,12 @@ class Model {
         const pages = Math.ceil(total / perPage);
         return {
             data: data,
-            pagination: {
-                total: total,
-                pages: pages,
-                page: page,
-                perPage: perPage,
-                nextPage: page < pages ? page + 1 : null,
-                prevPage: page > 1 && page <= pages ? page - 1 : null,
-            }
+            total: total,
+            pages: pages,
+            page: page,
+            perPage: perPage,
+            nextPage: page < pages ? page + 1 : null,
+            prevPage: page > 1 && page <= pages ? page - 1 : null,
         };
     }
 
@@ -477,6 +479,16 @@ class Model {
     }
 
     /**
+     * Find data by primary key
+     * @param primaryKey - primary key value
+     * @returns {Promise<*|null>}
+     */
+    async find(primaryKey) {
+        this._query.where = [];
+        return await this.where(this.primaryKey, primaryKey).first();
+    }
+
+    /**
      * Get data count
      * @returns {Promise<*|number>}
      */
@@ -495,6 +507,7 @@ class Model {
      */
     async insert(data) {
         this._query.data = _filter.fields(data, this.fillable, this.guarded);
+        if (Object.keys(this._query.data).length === 0) return null;
         this._query.action = 'insert';
         return await _process.call(this);
     }
@@ -507,7 +520,7 @@ class Model {
      */
     async update(data) {
         this._query.data = _filter.fields(data, this.fillable, this.guarded);
-
+        if (Object.keys(this._query.data).length === 0) return null;
         // for safety, update query must have where clause
         if (this._query.where === undefined) throw new Error('Update query must have where clause!');
 

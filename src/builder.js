@@ -21,9 +21,15 @@ const queryBuilder = (table, query) => {
             sqlQuery += ` FROM ${table}`
             break;
         case 'insert':
+            if (Object.keys(query.data).length === 0) {
+                throw new Error('Insert query must have data!');
+            }
             sqlQuery = `INSERT INTO ${table}`
             break;
         case 'update':
+            if (Object.keys(query.data).length === 0) {
+                throw new Error('Update query must have data!');
+            }
             sqlQuery = `UPDATE ${table}`
             break;
         case 'delete':
