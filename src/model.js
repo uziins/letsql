@@ -102,7 +102,7 @@ class Model {
      * Init fillable. Fields that can be filled. Can be overridden by child class.
      * Init guarded. Fields that cannot be filled. Can be overridden by child class.
      * Init hidden. Fields that will be hidden from result. Can be overridden by child class.
-     * Init timestamp. Will update `updated_at` column if true. Can be overridden by child class.
+     * Init timestamp. Will set `created_at` and `updated_at` column if true. Can be overridden by child class.
      * Init softDelete. Will update `deleted_at` column if true. Can be overridden by child class.
      * Init perPage. Number of rows per page. Can be overridden by child class.
      * Init casts. Casts data type. Can be overridden by child class. Available casts: json, boolean, date, number, string
@@ -508,6 +508,11 @@ class Model {
     async insert(data) {
         this._query.data = _filter.fields(data, this.fillable, this.guarded);
         if (Object.keys(this._query.data).length === 0) return null;
+
+        if (this.timestamp) {
+            this._query.data.created_at = new Date();
+        }
+
         this._query.action = 'insert';
         return await _process.call(this);
     }

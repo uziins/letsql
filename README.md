@@ -61,7 +61,7 @@ An array of columns that are not allowed to be filled when creating or updating 
 #### hidden [array]
 An array of columns that are not returned when querying the database.
 #### timestamp [boolean|default: true]
-Whether to automatically update the `updated_at` when updating a record. (`updated_at` column must exist in the table - `timestamp` type)
+Automatically set the `created_at` when creating a record and the `updated_at` when updating a record. (`created_at` and `updated_at` columns must exist in the table - `timestamp` type).
 #### softDelete [boolean|default: false]
 Whether to automatically update the `deleted_at` when deleting a record. It also excludes records with `deleted_at` value from being queried.
 (`deleted_at` column must exist in the table - `timestamp` type).
