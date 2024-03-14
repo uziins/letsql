@@ -11,12 +11,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: mirromutth/mysql-action@v1.1
+        with:
+          host port: 3900
+          container port: 3308
+          mysql database: 'test_db'
+          mysql root password: 'secret'
+      - run: sleep 20
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 16
       - run: npm ci
       - run: npm test
+        env:
+          DB_HOST: localhost
+          DB_PORT: 3900
+          DB_USER: root
+          DB_PASSWORD: secret
+          DB_DATABASE: test_db
 
   publish-npm:
     needs: build

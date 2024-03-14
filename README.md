@@ -1,7 +1,7 @@
 # LetSQL
 
 A lightweight and user-friendly Node.js ORM module for MySQL databases. Inspired by Eloquent in Laravel.
-Basically, it is a wrapper around the [mysql](https://www.npmjs.com/package/mysql) module with a few additional features.
+Basically, it is a wrapper around the [mysql](https://www.npmjs.com/package/mysql2) module with a few additional features.
 
 ## Installation
 
@@ -151,7 +151,7 @@ let users = await User.paginate(1, 10);
 #### Parameters
 - data [object|required] - An object of key-value pairs to insert into the table.
 ####
-Insert a record into the table. Returns object from [mysql](https://www.npmjs.com/package/mysql) module.
+Insert a record into the table. Returns object from [mysql](https://www.npmjs.com/package/mysql2) module.
 ```javascript
 let user = await User.insert({ name: 'John Doe', username: 'john_doe', is_active: 1 });
 ```
@@ -172,7 +172,7 @@ let user = await User.insert({ name: 'John Doe', username: 'john_doe', is_active
 #### Parameters
 - data [object|required] - An object of key-value pairs to update in the table.
 ####
-Update records in the table. Should be used with `where()` method. Returns object from [mysql](https://www.npmjs.com/package/mysql) module.
+Update records in the table. Should be used with `where()` method. Returns object from [mysql](https://www.npmjs.com/package/mysql2) module.
 ```javascript
 let user = await User.where('id', 1).update({ is_active: 0 });
 ```
@@ -190,7 +190,7 @@ let user = await User.where('id', 1).update({ is_active: 0 });
 ```
 
 ### delete()
-Delete records from the table. Should be used with `where()` method. Returns object from [mysql](https://www.npmjs.com/package/mysql) module.
+Delete records from the table. Should be used with `where()` method. Returns object from [mysql](https://www.npmjs.com/package/mysql2) module.
 If the `softDelete` property is set to `true`, it will update the `deleted_at` column instead of deleting the record.
 ```javascript
 let user = await User.where('id', 1).delete();
@@ -209,7 +209,7 @@ let user = await User.where('id', 1).delete();
 ```
 
 ### forceDelete()
-Delete records from the table whether the `softDelete` property is set to `true` or not. Should be used with `where()` method. Returns object from [mysql](https://www.npmjs.com/package/mysql) module.
+Delete records from the table whether the `softDelete` property is set to `true` or not. Should be used with `where()` method. Returns object from [mysql](https://www.npmjs.com/package/mysql2) module.
 ```javascript
 let user = await User.where('id', 1).forceDelete();
 ```

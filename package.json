@@ -1,6 +1,6 @@
 {
   "name": "letsql",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A lightweight and user-friendly Node.js ORM module for MySQL databases. Inspired by Eloquent in Laravel.",
   "main": "index.js",
   "scripts": {
@@ -20,6 +20,6 @@
   "repository": "uziins/letsql",
   "dependencies": {
     "dotenv": "^16.4.5",
-    "mysql": "^2.18.1"
+    "mysql2": "^3.9.2"
   }
 }
