@@ -17,6 +17,11 @@ const User = new Users();
         password: 'password',
         phone: '123456789',
         username: 'jane_doe',
+        data: {
+            'address': '123 Main St',
+            'city': 'New York',
+            'has_car': true
+        }
     })
 
     const users = await User.select('username,email').get();

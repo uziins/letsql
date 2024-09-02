@@ -189,10 +189,8 @@ class Model {
         this._query.where = this._query.where ?? [];
         if (arguments.length === 1 && typeof field === 'object') {
             // if field is an object key-value pair, we treat it as equal operator with field as key and value as value
-            for (let f in field) {
-                if (field.hasOwnProperty(f))
-                    this._query.where.push({field: f, operator: '=', value: field[f], condition: 'AND'});
-
+            for (const f in field) {
+                this._query.where.push({field: f, operator: '=', value: field[f], condition: 'AND'});
             }
         } else if (arguments.length === 2) {
             // if arguments length is 2, we treat it as equal operator with first argument as field and second argument as value
@@ -509,6 +507,9 @@ class Model {
         this._query.data = _filter.fields(data, this.fillable, this.guarded);
         if (Object.keys(this._query.data).length === 0) return null;
 
+        // cast data type if exist
+        this._query.data = _filter.casts(this._query.data, this.casts, true);
+
         if (this.timestamp) {
             this._query.data.created_at = new Date();
         }
@@ -526,6 +527,8 @@ class Model {
     async update(data) {
         this._query.data = _filter.fields(data, this.fillable, this.guarded);
         if (Object.keys(this._query.data).length === 0) return null;
+        // cast data type if exist
+        this._query.data = _filter.casts(this._query.data, this.casts, true);
         // for safety, update query must have where clause
         if (this._query.where === undefined) throw new Error('Update query must have where clause!');
 
