@@ -14,6 +14,10 @@ async function _process(reset = true) {
     const query = _queryBuilder(this.table, _q)
     const data = await connection.query(query.sql, query.bindings);
 
+    if (data?.affectedRows > 0 && _q.action === 'insert' && this.uuidColumn) {
+        data.insertUuid = _q.data[this.uuidColumn];
+    }
+
     const doCast = _q.action === 'select' && this.casts && Object.keys(this.casts).length > 0;
     const doRelation = _q.action === 'select' && _q.relations?.length > 0;
     const doHideField = _q.action === 'select' && this.hidden && this.hidden.length > 0;
@@ -99,6 +103,7 @@ class Model {
      * @description
      * Init table. Must be overridden by child class.
      * Init primaryKey. Primary key of the table. Can be overridden by child class.
+     * Init uuidColumn. UUID column of the table, will be filled automatically if set. Can be overridden by child class.
      * Init fillable. Fields that can be filled. Can be overridden by child class.
      * Init guarded. Fields that cannot be filled. Can be overridden by child class.
      * Init hidden. Fields that will be hidden from result. Can be overridden by child class.
@@ -110,6 +115,7 @@ class Model {
     constructor() {
         this.table = ''; // init table, must be overridden by child class
         this.primaryKey = 'id'; // can be overridden by child class
+        this.uuidColumn = ''; // can be overridden by child class
         this.fillable = []; // can be overridden by child class
         this.guarded = []; // can be overridden by child class
         this.hidden = []; // can be overridden by child class
@@ -189,10 +195,8 @@ class Model {
         this._query.where = this._query.where ?? [];
         if (arguments.length === 1 && typeof field === 'object') {
             // if field is an object key-value pair, we treat it as equal operator with field as key and value as value
-            for (let f in field) {
-                if (field.hasOwnProperty(f))
-                    this._query.where.push({field: f, operator: '=', value: field[f], condition: 'AND'});
-
+            for (const f in field) {
+                this._query.where.push({field: f, operator: '=', value: field[f], condition: 'AND'});
             }
         } else if (arguments.length === 2) {
             // if arguments length is 2, we treat it as equal operator with first argument as field and second argument as value
@@ -509,6 +513,13 @@ class Model {
         this._query.data = _filter.fields(data, this.fillable, this.guarded);
         if (Object.keys(this._query.data).length === 0) return null;
 
+        // cast data type if exist
+        this._query.data = _filter.casts(this._query.data, this.casts, true);
+
+        if (this.uuidColumn) {
+            this._query.data[this.uuidColumn] = crypto.randomUUID();
+        }
+
         if (this.timestamp) {
             this._query.data.created_at = new Date();
         }
@@ -526,6 +537,8 @@ class Model {
     async update(data) {
         this._query.data = _filter.fields(data, this.fillable, this.guarded);
         if (Object.keys(this._query.data).length === 0) return null;
+        // cast data type if exist
+        this._query.data = _filter.casts(this._query.data, this.casts, true);
         // for safety, update query must have where clause
         if (this._query.where === undefined) throw new Error('Update query must have where clause!');
 

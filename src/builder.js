@@ -45,16 +45,15 @@ const queryBuilder = (table, query) => {
 
     if (action === 'update' || action === 'insert') {
         sqlQuery += ' SET ';
-        for (let field in query.data) {
-            if (query.data.hasOwnProperty(field)) {
-                if (query.data[field] === null) {
-                    sqlQuery += `${field} = NULL, `;
-                } else if (typeof query.data[field] === 'boolean') {
-                    sqlQuery += `${field} = ${query.data[field] ? 1 : 0}, `;
-                } else {
-                    sqlQuery += `${field} = ?, `;
-                    bindings.push(query.data[field]);
-                }
+        for (const field in query.data) {
+            const value = query.data[field];
+            if (value === null) {
+                sqlQuery += `${field} = NULL, `;
+            } else if (typeof value === 'boolean') {
+                sqlQuery += `${field} = ${value ? 1 : 0}, `;
+            } else {
+                sqlQuery += `${field} = ?, `;
+                bindings.push(value);
             }
         }
         sqlQuery = sqlQuery.slice(0, -2); // remove last comma and space

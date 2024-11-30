@@ -54,6 +54,10 @@ const User = new UserModel();
 ### Properties
 #### table [string|required]
 The name of the table in the database.
+#### primaryKey [string|default: 'id']
+The primary key of the table.
+#### uuidColumn [string]
+The column to use as a UUID. It will automatically generate a UUID when creating a record.
 #### fillable [array]
 An array of columns that are allowed to be filled when creating or updating a record.
 #### guarded [array]
