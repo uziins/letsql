@@ -1,4 +1,5 @@
 const connection = require('../lib/mysql')
+const crypto = require('crypto')
 const _queryBuilder = require('./builder')
 const _filter = require('./filter')
 
