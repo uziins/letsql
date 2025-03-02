@@ -1,9 +1,11 @@
 require('dotenv').config();
 const Users = require('./models/users');
 const Chats = require('./models/chats');
+const Products = require('./models/products');
 
 const User = new Users();
 const Chat = new Chats();
+const Product = new Products();
 
 (async () => {
     // check table users
@@ -40,7 +42,7 @@ const Chat = new Chats();
     // const users = await User.select('username,email').get();
     // console.log(users);
 
-    console.log(await User.find(1));
+    console.log('User', await User.find(1));
     // console.log(await User.paginate());
 
 
@@ -49,6 +51,24 @@ const Chat = new Chats();
     // }));
 
     // console.log(await User.select('count(id) as total', 'phone').groupBy('phone').get());
+
+    // check table products
+    let tableProduct = await User.rawQuery('SHOW TABLES LIKE "products"');
+    if (tableProduct.length === 0) {
+        console.log('Creating table products')
+        await User.rawQuery('create table products (id BIGINT PRIMARY KEY, name VARCHAR(255), price DECIMAL(10,2), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP);')
+    }
+    let productData = {
+        id: 1,
+        name: 'Product 1',
+        price: 100
+    }
+    await Product.insertIgnore(productData);
+    await Product.insertIgnore(productData);
+    console.log('Product', await Product.find(1));
+    productData.name = 'Product 1 Updated';
+    await Product.insertOrUpdate(productData);
+    console.log('Product', await Product.find(1));
 
     process.exit()
 })();

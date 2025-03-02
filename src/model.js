@@ -529,6 +529,54 @@ class Model {
         return await _process.call(this);
     }
 
+    /**
+     * Insert data with ignore duplicate key
+     * @param data
+     * @returns {Promise<unknown>}
+     */
+    async insertIgnore(data) {
+        this._query.data = _filter.fields(data, this.fillable, this.guarded);
+        if (Object.keys(this._query.data).length === 0) return null;
+
+        // cast data type if exist
+        this._query.data = _filter.casts(this._query.data, this.casts, true);
+
+        if (this.uuidColumn) {
+            this._query.data[this.uuidColumn] = crypto.randomUUID();
+        }
+
+        if (this.timestamp) {
+            this._query.data.created_at = new Date();
+        }
+
+        this._query.action = 'insertIgnore';
+        return await _process.call(this);
+    }
+
+    /**
+     * Insert data or update if duplicate key
+     * @param data
+     * @returns {Promise<unknown>}
+     */
+    async insertOrUpdate(data) {
+        this._query.data = _filter.fields(data, this.fillable, this.guarded);
+        if (Object.keys(this._query.data).length === 0) return null;
+
+        // cast data type if exist
+        this._query.data = _filter.casts(this._query.data, this.casts, true);
+
+        if (this.uuidColumn) {
+            this._query.data[this.uuidColumn] = crypto.randomUUID();
+        }
+
+        if (this.timestamp) {
+            this._query.data.created_at = new Date();
+        }
+
+        this._query.action = 'insertUpdate';
+        return await _process.call(this);
+    }
+
     // UPDATE
     /**
      * Update data
