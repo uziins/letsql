@@ -172,6 +172,48 @@ let user = await User.insert({ name: 'John Doe', username: 'john_doe', is_active
 }
 ```
 
+### insertIgnore(data)
+#### Parameters
+- data [object|required] - An object of key-value pairs to insert into the table.
+####
+Insert a record into the table if it does not exist (based on the primary key or unique key). Returns object from [mysql](https://www.npmjs.com/package/mysql2) module.
+```javascript
+let user = await User.insertIgnore({name: 'John Doe', username: 'john_doe', is_active: 1 });
+```
+```javascript
+{
+    fieldCount: 0,
+    affectedRows: 0,
+    insertId: 0,
+    serverStatus: 2,
+    warningCount: 0,
+    message: '',
+    protocol41: true,
+    changedRows: 0
+}
+```
+
+### insertOrUpdate(data)
+#### Parameters
+- data [object|required] - An object of key-value pairs to insert or update in the table.
+####
+Insert a record into the table if it does not exist (based on the primary key or unique key) or update the record if it exists. Returns object from [mysql](https://www.npmjs.com/package/mysql2) module.
+```javascript
+let user = await User.insertOrUpdate({ id: 1, name: 'John Doe', username: 'john_doe', is_active: 1 });
+```
+```javascript
+{
+    fieldCount: 0,
+    affectedRows: 1,
+    insertId: 0,
+    serverStatus: 2,
+    warningCount: 0,
+    message: '',
+    protocol41: true,
+    changedRows: 0
+}
+```
+
 ### update(data)
 #### Parameters
 - data [object|required] - An object of key-value pairs to update in the table.

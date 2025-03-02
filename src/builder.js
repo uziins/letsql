@@ -21,10 +21,17 @@ const queryBuilder = (table, query) => {
             sqlQuery += ` FROM ${table}`
             break;
         case 'insert':
+        case 'insertUpdate':
             if (Object.keys(query.data).length === 0) {
                 throw new Error('Insert query must have data!');
             }
             sqlQuery = `INSERT INTO ${table}`
+            break;
+        case 'insertIgnore':
+            if (Object.keys(query.data).length === 0) {
+                throw new Error('Insert query must have data!');
+            }
+            sqlQuery = `INSERT IGNORE INTO ${table}`
             break;
         case 'update':
             if (Object.keys(query.data).length === 0) {
@@ -43,20 +50,18 @@ const queryBuilder = (table, query) => {
             throw new Error('Invalid _query.action');
     }
 
-    if (action === 'update' || action === 'insert') {
-        sqlQuery += ' SET ';
-        for (const field in query.data) {
-            const value = query.data[field];
-            if (value === null) {
-                sqlQuery += `${field} = NULL, `;
-            } else if (typeof value === 'boolean') {
-                sqlQuery += `${field} = ${value ? 1 : 0}, `;
-            } else {
-                sqlQuery += `${field} = ?, `;
-                bindings.push(value);
-            }
+    if (action === 'insert' || action === 'insertIgnore' || action === 'insertUpdate') {
+        const fields = Object.keys(query.data);
+        const values = Object.values(query.data);
+        sqlQuery += ` (${fields.join(', ')}) VALUES (${fields.map(() => '?').join(', ')})`;
+        bindings = values;
+
+        if (action === 'insertUpdate') {
+            sqlQuery += ' ON DUPLICATE KEY UPDATE' + _buildSetValue(query.data);
         }
-        sqlQuery = sqlQuery.slice(0, -2); // remove last comma and space
+
+    } else if (action === 'update') {
+        sqlQuery += ' SET ' + _buildSetValue(query.data);
     }
 
     if (query.joins?.length > 0) {
@@ -70,6 +75,22 @@ const queryBuilder = (table, query) => {
             }
             sqlQuery += ` ${join.type} JOIN ${join.table} ON ${join.first} ${join.operator} ${join.second}`;
         });
+    }
+
+    function _buildSetValue(data) {
+        let sql = '';
+        for (const field in data) {
+            const value = data[field];
+            if (value === null) {
+                sql += ` ${field} = NULL,`;
+            } else if (typeof value === 'boolean') {
+                sql += ` ${field} = ${value ? 1 : 0},`;
+            } else {
+                sql += ` ${field} = ?,`;
+                bindings.push(value);
+            }
+        }
+        return sql.slice(0, -1);
     }
 
     function _writeWhere(where) {
