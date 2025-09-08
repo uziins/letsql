@@ -547,6 +547,7 @@ class Model {
 
         if (this.timestamp) {
             this._query.data.created_at = new Date();
+            this._query.data.updated_at = new Date();
         }
 
         this._query.action = 'insertIgnore';
@@ -571,6 +572,7 @@ class Model {
 
         if (this.timestamp) {
             this._query.data.created_at = new Date();
+            this._query.data.updated_at = new Date();
         }
 
         this._query.action = 'insertUpdate';

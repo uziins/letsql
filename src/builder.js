@@ -112,13 +112,17 @@ const queryBuilder = (table, query) => {
                 newField = `${table}.${clause.field}`;
             }
             if (clause.operator === 'IN' || clause.operator === 'NOT IN') {
-                sql += ` ${newField} ${clause.operator} (?)`;
-                bindings.push(clause.value);
+                // For IN/NOT IN operators, we need multiple placeholders
+                const placeholders = clause.value.map(() => '?').join(', ');
+                sql += ` ${newField} ${clause.operator} (${placeholders})`;
+                // Push each value individually to bindings
+                clause.value.forEach(val => bindings.push(val));
             } else if (clause.operator === 'IS' || clause.operator === 'IS NOT') {
                 sql += ` ${newField} ${clause.operator} ${clause.value}`;
             } else {
                 sql += ` ${newField} ${clause.operator} ?`;
-                bindings.push(clause.value);
+                const bindValue = clause.value !== undefined ? clause.value : null;
+                bindings.push(bindValue);
             }
         }
         return sql;
@@ -144,12 +148,16 @@ const queryBuilder = (table, query) => {
 
     if (query.limit) {
         sqlQuery += ` LIMIT ?`;
-        bindings.push(Number(query.limit));
+        bindings.push(parseInt(query.limit, 10));
         if (query.offset) {
             sqlQuery += ` OFFSET ?`;
-            bindings.push(Number(query.offset));
+            bindings.push(parseInt(query.offset, 10));
         }
     }
+    
+    // Filter out any undefined values from bindings - MySQL 8 is stricter
+    bindings = bindings.filter(binding => binding !== undefined);
+    
     return {sql: sqlQuery, bindings: bindings};
 }
 

@@ -1,10 +1,14 @@
 {
   "name": "letsql",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A lightweight and user-friendly Node.js ORM module for MySQL databases. Inspired by Eloquent in Laravel.",
   "main": "index.js",
   "scripts": {
-    "test": "node example/test.js"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:simple": "node tests/test-runner.js",
+    "example": "node example/test.js"
   },
   "keywords": [
     "mysql",
@@ -17,9 +21,42 @@
   ],
   "author": "uziins",
   "license": "MIT",
-  "repository": "uziins/letsql",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uziins/letsql.git"
+  },
   "dependencies": {
     "dotenv": "^16.4.5",
     "mysql2": "^3.11.5"
-  }
+  },
+  "directories": {
+    "example": "example",
+    "lib": "lib"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "lib/**/*.js",
+      "!tests/**",
+      "!example/**"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ]
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/uziins/letsql/issues"
+  },
+  "homepage": "https://github.com/uziins/letsql#readme"
 }

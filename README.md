@@ -20,6 +20,45 @@ DB_PASSWORD=
 DB_DATABASE=database
 ```
 
+## Database Connection
+
+LetSQL uses an advanced connection pooling system to ensure reliable database connectivity and prevent common MySQL timeout issues.
+
+### Features
+- **Connection Pooling**: Manages up to 10 simultaneous connections automatically
+- **Auto-Reconnection**: Automatically reconnects when connections are lost
+- **Timeout Prevention**: Built-in keep-alive mechanism pings the database every 5 minutes
+- **Retry Logic**: Automatically retries failed queries up to 3 times with 1-second delays
+- **Graceful Shutdown**: Properly closes all connections when your application exits
+
+### Connection Management
+The library automatically handles connection management, but you can access additional functions if needed:
+
+```javascript
+const { healthCheck, closePool, startKeepAlive, stopKeepAlive } = require('letsql/lib/mysql');
+
+// Check database connectivity
+const isHealthy = await healthCheck();
+
+// Graceful shutdown (recommended for production apps)
+process.on('SIGINT', async () => {
+    await closePool();
+    process.exit(0);
+});
+
+// Control keep-alive pings manually
+stopKeepAlive(); // Stop automatic pings
+startKeepAlive(); // Resume automatic pings
+```
+
+### Error Handling
+The library automatically handles common MySQL errors:
+- `PROTOCOL_CONNECTION_LOST`: Connection lost due to inactivity
+- `ECONNRESET`: Connection reset by server
+- `ER_CON_COUNT_ERROR`: Too many connections error
+
+These errors trigger automatic reconnection and retry attempts, making your application more resilient.
+
 ## Usage
 
 ### Extending the Model
@@ -653,7 +692,7 @@ let users = await User.with('posts').get();
         is_active: 1,
         posts: [
             { id: 3, user_id: 2, title: 'Post 3' }
-        }
+        ]
     }
     ...
 ]
