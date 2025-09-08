@@ -14,24 +14,40 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: letsql_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -psecret"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - uses: mirromutth/mysql-action@v1.1
-        with:
-          host port: 3900
-          container port: 3308
-          mysql database: 'letsql_test'
-          mysql root password: 'secret'
-      - run: sleep 20
+
+      # Tunggu sampai service MySQL sehat
+      - name: Wait for MySQL
+        run: |
+          for i in {1..60}; do
+            mysqladmin ping -h 127.0.0.1 -psecret --silent && break
+            sleep 2
+          done
       - run: npm ci
-      - run: npm test
+
+      - name: Run tests
+        run: npm test
         env:
-          DB_HOST: localhost
-          DB_PORT: 3900
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
           DB_USER: root
           DB_PASSWORD: secret
           DB_DATABASE: letsql_test
@@ -50,4 +66,4 @@ jobs:
       - run: npm ci
       - run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
