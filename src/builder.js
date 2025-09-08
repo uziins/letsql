@@ -121,7 +121,8 @@ const queryBuilder = (table, query) => {
                 sql += ` ${newField} ${clause.operator} ${clause.value}`;
             } else {
                 sql += ` ${newField} ${clause.operator} ?`;
-                bindings.push(clause.value);
+                const bindValue = clause.value !== undefined ? clause.value : null;
+                bindings.push(bindValue);
             }
         }
         return sql;
@@ -147,12 +148,16 @@ const queryBuilder = (table, query) => {
 
     if (query.limit) {
         sqlQuery += ` LIMIT ?`;
-        bindings.push(Number(query.limit));
+        bindings.push(parseInt(query.limit, 10));
         if (query.offset) {
             sqlQuery += ` OFFSET ?`;
-            bindings.push(Number(query.offset));
+            bindings.push(parseInt(query.offset, 10));
         }
     }
+    
+    // Filter out any undefined values from bindings - MySQL 8 is stricter
+    bindings = bindings.filter(binding => binding !== undefined);
+    
     return {sql: sqlQuery, bindings: bindings};
 }
 
