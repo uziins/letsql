@@ -11,7 +11,7 @@ const fields = (obj, fillable = [], guarded = []) => {
 const casts = (obj, casts = {}, reverse = false) => {
     // iterate through casts and set data type if exist
     for (const field in casts) {
-        if (obj[field] !== undefined) {
+        if (obj[field] !== undefined && obj[field] !== null) {
             if (reverse) {
                 switch (casts[field]) {
                     case 'json':
@@ -36,7 +36,14 @@ const casts = (obj, casts = {}, reverse = false) => {
             } else {
                 switch (casts[field]) {
                     case 'json':
-                        obj[field] = JSON.parse(obj[field]);
+                        if (typeof obj[field] === 'string') {
+                            try {
+                                obj[field] = JSON.parse(obj[field]);
+                            } catch (e) {
+                                // If parsing fails, keep original value
+                                console.warn(`Failed to parse JSON for field ${field}:`, e.message);
+                            }
+                        }
                         break;
                     case 'boolean':
                         obj[field] = Boolean(obj[field]);
