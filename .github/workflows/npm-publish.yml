@@ -15,17 +15,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
       - uses: mirromutth/mysql-action@v1.1
         with:
           host port: 3900
           container port: 3308
-          mysql database: 'test_db'
+          mysql database: 'letsql_test'
           mysql root password: 'secret'
       - run: sleep 20
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 20
       - run: npm ci
       - run: npm test
         env:
@@ -33,18 +34,20 @@ jobs:
           DB_PORT: 3900
           DB_USER: root
           DB_PASSWORD: secret
-          DB_DATABASE: test_db
+          DB_DATABASE: letsql_test
 
   publish-npm:
     needs: build
     runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'created'
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org/
+          cache: 'npm'
       - run: npm ci
       - run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
