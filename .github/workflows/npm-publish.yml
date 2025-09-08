@@ -12,94 +12,39 @@ on:
     branches: [ main, stable ]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: secret
-          MYSQL_DATABASE: letsql_test
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
-    strategy:
-      matrix:
-        node-version: [18, 20, 22]
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - uses: mirromutth/mysql-action@v1.1
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Wait for MySQL
-        run: |
-          while ! mysqladmin ping -h 127.0.0.1 -P 3306 -u root -psecret --silent; do
-            echo 'Waiting for MySQL...'
-            sleep 2
-          done
-          echo 'MySQL is ready!'
-
-      - name: Run tests
-        run: npm test
+          host port: 3900
+          container port: 3308
+          mysql database: 'test_db'
+          mysql root password: 'secret'
+      - run: sleep 20
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm test
         env:
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
+          DB_HOST: localhost
+          DB_PORT: 3900
           DB_USER: root
           DB_PASSWORD: secret
-          DB_DATABASE: letsql_test
-
-      - name: Run test coverage
-        run: npm run test:coverage
-        env:
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_USER: root
-          DB_PASSWORD: secret
-          DB_DATABASE: letsql_test
-
-      - name: Upload coverage to Codecov
-        if: matrix.node-version == 20
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
+          DB_DATABASE: test_db
 
   publish-npm:
-    needs: test
+    needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org/
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Publish to npm
-        run: npm publish
+      - run: npm ci
+      - run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
